@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import styles from "./styles.module.scss";
 
 interface Task {
@@ -21,12 +21,23 @@ export const Tasks: React.FC = () => {
     }
 
     //adicione a tarefa
-    setTasks([
+    const newTasks = [
       ...tasks, //pega todas as tarefas que já existam e coloca nesse novo valor do estado da tarefa
       { id: new Date().getTime(), title: taskTitle, done: false },
-    ]);
+    ];
+    setTasks(newTasks);
+    localStorage.setItem("tasks", JSON.stringify(newTasks));
+
     setTasktitle("");
   }
+
+  useEffect(() => {
+    const tasksOnLocalStorage = localStorage.getItem("tasks");
+
+    if (tasksOnLocalStorage) {
+      setTasks(JSON.parse(tasksOnLocalStorage));
+    }
+  }, []);
 
   return (
     <section className={styles.container}>
