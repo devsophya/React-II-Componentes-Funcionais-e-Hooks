@@ -1,15 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import styles from "./styles.module.scss";
-
-interface Task {
-  title: string;
-  done: boolean;
-  id: number;
-}
+import { TasksContext } from "../../context/TasksContext";
 
 export const Tasks: React.FC = () => {
   const [taskTitle, setTasktitle] = useState("");
-  const [tasks, setTasks] = useState([] as Task[]);
+
+  const { tasks, setTasks } = useContext(TasksContext);
 
   //Função disparada quando o usuário está querendo adicionar uma nova tarefa
   function handleSubmitAddTask(event: FormEvent) {
@@ -22,7 +18,8 @@ export const Tasks: React.FC = () => {
 
     //adicione a tarefa
     const newTasks = [
-      ...tasks, //pega todas as tarefas que já existam e coloca nesse novo valor do estado da tarefa
+      ...tasks, //pega t
+      // odas as tarefas que já existam e coloca nesse novo valor do estado da tarefa
       { id: new Date().getTime(), title: taskTitle, done: false },
     ];
     setTasks(newTasks);
@@ -31,13 +28,20 @@ export const Tasks: React.FC = () => {
     setTasktitle("");
   }
 
-  useEffect(() => {
-    const tasksOnLocalStorage = localStorage.getItem("tasks");
+  function handleToggleTaskStatus(taskId: number) {
+    const newTasks = tasks.map((task) => {
+      if (taskId === task.id) {
+        return {
+          ...task,
+          done: !task.done, // inverte o status da tarefa
+        };
+      }
 
-    if (tasksOnLocalStorage) {
-      setTasks(JSON.parse(tasksOnLocalStorage));
-    }
-  }, []);
+      return task;
+    });
+
+    setTasks(newTasks);
+  }
 
   return (
     <section className={styles.container}>
@@ -60,8 +64,17 @@ export const Tasks: React.FC = () => {
         {tasks.map((task) => {
           return (
             <li key={task.id}>
-              <input type="checkbox" id={`task-${task.id}`} />
-              <label htmlFor={`task-${task.id}`}>{task.title}</label>
+              <input
+                type="checkbox"
+                id={`task-${task.id}`}
+                onChange={() => handleToggleTaskStatus(task.id)}
+              />
+              <label
+                className={task.done ? styles.done : ""}
+                htmlFor={`task-${task.id}`}
+              >
+                {task.title}
+              </label>
             </li>
           );
         })}
